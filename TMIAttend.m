@@ -157,7 +157,7 @@ for iMail =1: nCount
     vHourColumn= zeros(1,8);
     for iHours=1:size(vAbsent,1)
         if strcmp(vAbsent(iHours),'0600')
-            vHourColumn(1) = 1;
+            vHourColumn(1) = n600;
             vHourId(1) = iHours;
             if cellfun('isempty',handles.mStudent(nRow,n600))
                 % Mark all student present for 0600 hours class
@@ -165,49 +165,49 @@ for iMail =1: nCount
                 
             end
         elseif strcmp(vAbsent(iHours),'0830')
-            vHourColumn(2) = 1;
+            vHourColumn(2) = n600+1;
             vHourId(2) = iHours;
             if cellfun('isempty',handles.mStudent(nRow,n600+1))
                 % Mark all student present for 0830 hours class
                 handles.mStudent(nRow:end,vHourColumn(2))={2};
             end
         elseif strcmp(vAbsent(iHours),'0930')
-            vHourColumn(3)= 1;
+            vHourColumn(3)= n600+2;
             vHourId(3) = iHours;
             if cellfun('isempty',handles.mStudent(nRow,n600+2))
                 % Mark all student present for 0930 hours class
                 handles.mStudent(nRow:end,n600+2)={2};
             end
         elseif strcmp(vAbsent(iHours),'1040')
-            vHourColumn (4)=1;
+            vHourColumn (4)= n600+3;
             vHourId(4) = iHours;
             if cellfun('isempty',handles.mStudent(nRow, n600+3))
                 % Mark all student present for 1040 hours class
                 handles.mStudent(nRow:end, n600+3)={2};
             end
         elseif strcmp(vAbsent(iHours),'1140')
-            vHourColumn(5) =1;
+            vHourColumn(5) =n600+4;
             vHourId(5) = iHours;
             if cellfun('isempty',handles.mStudent(nRow,n600+4))
                 % Mark all student present for 1140 hours class
                 handles.mStudent(nRow:end,n600+4)={2};
             end
         elseif strcmp(vAbsent(iHours),'1340')
-            vHourColumn(6) = 1;
+            vHourColumn(6) = n600+5;
             vHourId(6) = iHours;
             % Mark all student present for 1340 hours class
             if cellfun('isempty',handles.mStudent(nRow,n600+5))
                 handles.mStudent(nRow:end,n600+5)={2};
             end
         elseif strcmp(vAbsent(iHours),'1440')
-            vHourColumn(7) =1;
+            vHourColumn(7) =n600+6;
             vHourId(7) = iHours;
             if cellfun('isempty',handles.mStudent(nRow,n600+6))
                 % Mark all student present for 1440 hours class
                 handles.mStudent(nRow:end,n600+6)={2};
             end
         elseif strcmp(vAbsent(iHours),'1540')
-            vHourColumn(8) = 1;
+            vHourColumn(8) = n600+7;
             vHourId(8) = iHours;
             if cellfun('isempty',handles.mStudent(nRow,n600+7))
                 % Mark all student present for 1540 hours class
@@ -235,16 +235,19 @@ for iMail =1: nCount
                     h = msgbox('You are updating Diploma in Nautical Science course attendance','TMI Attendance 1.2');
                     
                 end
-                if strcmp(vAbsent{j},'2016ME')
+                if strcmp(vAbsent(vHourId(iHour)+1),'2016ME')
                     sMsg =['Cadet ID is wrong in ', sSubject ,' mail... Please check'];
                     errordlg (sMsg)
                 end
-                idx = strfind(vId,vAbsent{j});
-                if isempty(idx)
-                    errordlg ('Cadet file is not in correct format ... Please check')
+                for iAbsent = 2:size(vAbsent,1)
+                    idx = strfind(vId,vAbsent{iAbsent});
+                    if isempty(idx)
+                        errordlg ('Cadet file is not in correct format ... Please check')
+                    end
+                    %Logic find absent students in list
+                    nIdx = not(cellfun('isempty',idx));
+                    handles.mStudent{nIdx,vHourColumn(iHour)}=1;
                 end
-                nIdx = not(cellfun('isempty',idx));
-                handles.mStudent{nIdx,vHourColumn}=1;
             end
         end
     end
