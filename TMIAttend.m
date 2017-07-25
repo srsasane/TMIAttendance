@@ -22,7 +22,7 @@ function varargout = TMIAttend(varargin)
 
 % Edit the above text to modify the response to help TMIAttend
 
-% Last Modified by GUIDE v2.5 06-Jul-2017 08:47:49
+% Last Modified by GUIDE v2.5 25-Jul-2017 09:27:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -80,7 +80,13 @@ function LoadFile_Callback(hObject, eventdata, handles)
 % Load excel file containing all list of ME / NS students
 [FileName,PathName]=uigetfile('*.xlsx', 'Select Cadet list file');
 handles.ExcelFile=fullfile(PathName,FileName);
-[a, mStudent]=xlsread(handles.ExcelFile);
+
+[a, mStudentME1,cRawME1]=xlsread(handles.ExcelFile,'ME1');
+[a, mStudentME2,cRawME2]=xlsread(handles.ExcelFile,'ME2');
+[a, mStudentNS1,cRawNS1]=xlsread(handles.ExcelFile,'NS1');
+[a, mStudentNS2,cRawNS2]=xlsread(handles.ExcelFile,'NS2');
+[a, mStudentDNS,cRawDNS]=xlsread(handles.ExcelFile,'DNS');
+
 % Check if write file is loaded
 %    errordlg ('Cadet file is not in correct format ... Please check')
 %end
@@ -457,3 +463,15 @@ function date_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes when entered data in editable cell(s) in uitable6.
+function uitable6_CellEditCallback(hObject, eventdata, handles)
+% hObject    handle to uitable6 (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.TABLE)
+%	Indices: row and column indices of the cell(s) edited
+%	PreviousData: previous data for the cell(s) edited
+%	EditData: string(s) entered by the user
+%	NewData: EditData or its converted form set on the Data property. Empty if Data was not changed
+%	Error: error string when failed to convert EditData to appropriate value for Data
+% handles    structure with handles and user data (see GUIDATA)
