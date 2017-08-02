@@ -54,10 +54,10 @@ function TMIAttend_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for TMIAttend
 handles.output = hObject;
+handles.ExcelFile='Z:\Sudhir-s\TMIAttendance\master.xlsx';
 
 % Update handles structure
 guidata(hObject, handles);
-
 % UIWAIT makes TMIAttend wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -71,6 +71,7 @@ function varargout = TMIAttend_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+
 % --- Executes on button press in LoadFile.
 function LoadFile_Callback(hObject, eventdata, handles)
 % hObject    handle to LoadFile (see GCBO)
@@ -78,8 +79,8 @@ function LoadFile_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %=====||======
 % Load excel file containing all list of ME / NS students
-[FileName,PathName]=uigetfile('*.xlsx', 'Select Cadet list file');
-handles.ExcelFile=fullfile(PathName,FileName);
+%[FileName,PathName]=uigetfile('*.xlsx', 'Select Cadet list file');
+%handles.ExcelFile=fullfile(PathName,FileName);
 
 [a, mStudentME1,cRawME1]=xlsread(handles.ExcelFile,'ME1');
 [a, mStudentME2,cRawME2]=xlsread(handles.ExcelFile,'ME2');
@@ -143,7 +144,7 @@ for iMail =1: nCount
     sBody = email.get('Body');
     C = textscan(sSubject,'%s','Delimiter',',');
     vSubject = cell (C{1,1});
-    
+    sCourseYear= strcat(vSubject(1),vSubject(2));
     C = textscan(sBody,'%s','Delimiter',',');
     vAbsent = cell(C{1,1});
     
@@ -158,101 +159,113 @@ for iMail =1: nCount
     set(handles.uitable6,'data',vAbsent);
     vId = handles.mStudent(:,1);
     nRow = 1;
-    %% Logic to find hours in absent student list
-    vHourId = zeros(1,8);
-    vHourColumn= zeros(1,8);
-    for iHours=1:size(vAbsent,1)
-        if strcmp(vAbsent(iHours),'0600')
-            vHourColumn(1) = n600;
-            vHourId(1) = iHours;
-            if cellfun('isempty',handles.mStudent(nRow,n600))
-                % Mark all student present for 0600 hours class
-                handles.mStudent(nRow:end,vHourColumn(1))={2};
-                
-            end
-        elseif strcmp(vAbsent(iHours),'0830')
-            vHourColumn(2) = n600+1;
-            vHourId(2) = iHours;
-            if cellfun('isempty',handles.mStudent(nRow,n600+1))
-                % Mark all student present for 0830 hours class
-                handles.mStudent(nRow:end,vHourColumn(2))={2};
-            end
-        elseif strcmp(vAbsent(iHours),'0930')
-            vHourColumn(3)= n600+2;
-            vHourId(3) = iHours;
-            if cellfun('isempty',handles.mStudent(nRow,n600+2))
-                % Mark all student present for 0930 hours class
-                handles.mStudent(nRow:end,n600+2)={2};
-            end
-        elseif strcmp(vAbsent(iHours),'1040')
-            vHourColumn (4)= n600+3;
-            vHourId(4) = iHours;
-            if cellfun('isempty',handles.mStudent(nRow, n600+3))
-                % Mark all student present for 1040 hours class
-                handles.mStudent(nRow:end, n600+3)={2};
-            end
-        elseif strcmp(vAbsent(iHours),'1140')
-            vHourColumn(5) =n600+4;
-            vHourId(5) = iHours;
-            if cellfun('isempty',handles.mStudent(nRow,n600+4))
-                % Mark all student present for 1140 hours class
-                handles.mStudent(nRow:end,n600+4)={2};
-            end
-        elseif strcmp(vAbsent(iHours),'1340')
-            vHourColumn(6) = n600+5;
-            vHourId(6) = iHours;
-            % Mark all student present for 1340 hours class
-            if cellfun('isempty',handles.mStudent(nRow,n600+5))
-                handles.mStudent(nRow:end,n600+5)={2};
-            end
-        elseif strcmp(vAbsent(iHours),'1440')
-            vHourColumn(7) =n600+6;
-            vHourId(7) = iHours;
-            if cellfun('isempty',handles.mStudent(nRow,n600+6))
-                % Mark all student present for 1440 hours class
-                handles.mStudent(nRow:end,n600+6)={2};
-            end
-        elseif strcmp(vAbsent(iHours),'1540')
-            vHourColumn(8) = n600+7;
-            vHourId(8) = iHours;
-            if cellfun('isempty',handles.mStudent(nRow,n600+7))
-                % Mark all student present for 1540 hours class
-                handles.mStudent(nRow:end,n600+7)={2};
-            end
-            %   else
-            %      error('Absent Text file is NOT in intended format ... Please check');
+    %% logic to update specific year
+    if strcmp(sCourseYear,handles.sSheet)
+        %% Logic to find hours in absent student list
+        vHourId = zeros(1,8);
+        vHourColumn= zeros(1,8);
+        %% Logic that adds attendance of time slot 0600
+        vHourColumn(1) = n600;
+        
+        if cellfun('isempty',handles.mStudent(nRow,n600))
+            % Mark all student present for 0600 hours class
+            handles.mStudent(nRow:end,vHourColumn(1))={2};
             
         end
-        %Find absent candet
-    end
-    %% Logic to make student absent
-    
-    for iHour=1:size(vHourId,2)
-        if vHourId(iHour)~=0
-            
-            if isequal(vHourId(iHour),1)&& isequal(iMail,1)
-                if ~isempty(strfind(handles.mStudent(4),'ME'))
-                    h = msgbox('You are updating Marine Engineering course attendance','TMI Attendance 1.2');
-                    
-                elseif~isempty(strfind(handles.mStudent(4),'NS'))
-                    h = msgbox('You are updating Nautical Science course attendance','TMI Attendance 1.2');
-                    
-                elseif  ~isempty(strfind(handles.mStudent(4),'DNS'))
-                    h = msgbox('You are updating Diploma in Nautical Science course attendance','TMI Attendance 1.2');
-                    
+        %%
+        for iHours=1:size(vAbsent,1)
+            %             if strcmp(vAbsent(iHours),'0600')
+            %                 vHourColumn(1) = n600;
+            %                 vHourId(1) = iHours;
+            %                 if cellfun('isempty',handles.mStudent(nRow,n600))
+            %                     % Mark all student present for 0600 hours class
+            %                     handles.mStudent(nRow:end,vHourColumn(1))={2};
+            %
+            %                 end
+            if strcmp(vAbsent(iHours),'0830')
+                vHourColumn(2) = n600+1;
+                vHourId(2) = iHours;
+                if cellfun('isempty',handles.mStudent(nRow,n600+1))
+                    % Mark all student present for 0830 hours class
+                    handles.mStudent(nRow:end,vHourColumn(2))={2};
                 end
-                if strcmp(vAbsent(vHourId(iHour)+1),'2016ME')
-                    sMsg =['Cadet ID is wrong in ', sSubject ,' mail... Please check'];
-                    errordlg (sMsg)
+            elseif strcmp(vAbsent(iHours),'0930')
+                vHourColumn(3)= n600+2;
+                vHourId(3) = iHours;
+                if cellfun('isempty',handles.mStudent(nRow,n600+2))
+                    % Mark all student present for 0930 hours class
+                    handles.mStudent(nRow:end,n600+2)={2};
                 end
-                for iAbsent = 2:size(vAbsent,1)
-                    idx = strfind(vId,vAbsent{iAbsent});
-                    if isempty(idx)
-                        errordlg ('Cadet file is not in correct format ... Please check')
+            elseif strcmp(vAbsent(iHours),'1040')
+                vHourColumn (4)= n600+3;
+                vHourId(4) = iHours;
+                if cellfun('isempty',handles.mStudent(nRow, n600+3))
+                    % Mark all student present for 1040 hours class
+                    handles.mStudent(nRow:end, n600+3)={2};
+                end
+            elseif strcmp(vAbsent(iHours),'1140')
+                vHourColumn(5) =n600+4;
+                vHourId(5) = iHours;
+                if cellfun('isempty',handles.mStudent(nRow,n600+4))
+                    % Mark all student present for 1140 hours class
+                    handles.mStudent(nRow:end,n600+4)={2};
+                end
+            elseif strcmp(vAbsent(iHours),'1340')
+                vHourColumn(6) = n600+5;
+                vHourId(6) = iHours;
+                % Mark all student present for 1340 hours class
+                if cellfun('isempty',handles.mStudent(nRow,n600+5))
+                    handles.mStudent(nRow:end,n600+5)={2};
+                end
+            elseif strcmp(vAbsent(iHours),'1440')
+                vHourColumn(7) =n600+6;
+                vHourId(7) = iHours;
+                if cellfun('isempty',handles.mStudent(nRow,n600+6))
+                    % Mark all student present for 1440 hours class
+                    handles.mStudent(nRow:end,n600+6)={2};
+                end
+            elseif strcmp(vAbsent(iHours),'1540')
+                vHourColumn(8) = n600+7;
+                vHourId(8) = iHours;
+                if cellfun('isempty',handles.mStudent(nRow,n600+7))
+                    % Mark all student present for 1540 hours class
+                    handles.mStudent(nRow:end,n600+7)={2};
+                end
+                %   else
+                %      error('Absent Text file is NOT in intended format ... Please check');
+                
+            end
+            %Find absent candet
+        end
+        %% Logic to make student absent
+        
+        for iHour=1:size(vHourId,2)
+            if vHourId(iHour)~=0
+                
+                if isequal(vHourId(iHour),1)&& isequal(iMail,1)
+                    if ~isempty(strfind(handles.mStudent(4),'ME'))
+                        h = msgbox('You are updating Marine Engineering course attendance','TMI Attendance 1.2');
+                        
+                    elseif~isempty(strfind(handles.mStudent(4),'NS'))
+                        h = msgbox('You are updating Nautical Science course attendance','TMI Attendance 1.2');
+                        
+                    elseif  ~isempty(strfind(handles.mStudent(4),'DNS'))
+                        h = msgbox('You are updating Diploma in Nautical Science course attendance','TMI Attendance 1.2');
+                        
                     end
-                    %Logic find absent students in list
-                    nIdx = not(cellfun('isempty',idx));
-                    handles.mStudent{nIdx,vHourColumn(iHour)}=1;
+                    if strcmp(vAbsent(vHourId(iHour)+1),'2016ME')
+                        sMsg =['Cadet ID is wrong in ', sSubject ,' mail... Please check'];
+                        errordlg (sMsg)
+                    end
+                    for iAbsent = 2:size(vAbsent,1)
+                        idx = strfind(vId,vAbsent{iAbsent});
+                        if isempty(idx)
+                            errordlg ('Cadet file is not in correct format ... Please check')
+                        end
+                        %Logic find absent students in list
+                        nIdx = not(cellfun('isempty',idx));
+                        handles.mStudent{nIdx,vHourColumn(iHour)}=1;
+                    end
                 end
             end
         end
@@ -336,6 +349,7 @@ end
 %     fclose(fileID);
 % end
 % Calculate score of each candidate
+ h = msgbox(sprintf('Total mail %d analysed ...',nCount));
 mData = cell2mat(handles.mStudent(:,n600:end));
 [vRow,vCol] = find(mData==1);
 mScore = 2*ones(size(mData,1),2);
@@ -491,7 +505,37 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenu2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(hObject,'String'));
+handles.sSheet= contents{get(hObject,'Value')};
+if handles.sSheet == 'ME1'
+    [a, mStudent,cRawME1]=xlsread(handles.ExcelFile,'ME1');
+    
+elseif handles.sSheet == 'ME2'
+    [a, mStudent,cRawME2]=xlsread(handles.ExcelFile,'ME2');
+    vID =  cellstr(num2str(a));
+    mStudent(3:2+size(a,1),1) = vID;
+elseif handles.sSheet == 'NS1'
+    [a, mStudent,cRawNS1]=xlsread(handles.ExcelFile,'NS1');
+elseif handles.sSheet == 'NS2'
+    [a, mStudent,cRawNS2]=xlsread(handles.ExcelFile,'NS2');
+elseif handles.sSheet == 'DNS'
+    [a, mStudent,cRawDNS]=xlsread(handles.ExcelFile,'DNS');
+else
+    [a, mStudent,cRawME1]=xlsread(handles.ExcelFile,'ME1');
+end
+if  strcmp(mStudent(2,2),'')
+    errordlg('Wrong excel file selected')
+end
+if (size(a,2)>3)
+    handles.vScore = a(2:end,9);
+end
+mStudent(3:end,end+9) = cell(1);
+handles.mStudent = mStudent(2:end,:);
 
+cnames = {'ID','_____Cadet Name______','________EmailId________','0600','0830','0930','1040','1140','1340','1440','1540','SCORE'};
+% Update data in to table
+set(handles.uitable5,'data',handles.mStudent,'ColumnName',cnames);
+guidata(hObject, handles);
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu2
 
