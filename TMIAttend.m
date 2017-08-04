@@ -242,7 +242,8 @@ for iMail =1: nCount
         for iHour=1:size(vHourId,2)
             if vHourId(iHour)~=0
                 
-                if isequal(vHourId(iHour),1)&& isequal(iMail,1)
+                if isequal(vHourId(iHour),1)&& isequal(iMail,1) % to display following messages once
+                %if isequal(vHourId(iHour),1)
                     if ~isempty(strfind(handles.mStudent(4),'ME'))
                         h = msgbox('You are updating Marine Engineering course attendance','TMI Attendance 1.2');
                         
@@ -253,20 +254,23 @@ for iMail =1: nCount
                         h = msgbox('You are updating Diploma in Nautical Science course attendance','TMI Attendance 1.2');
                         
                     end
-                    if strcmp(vAbsent(vHourId(iHour)+1),'2016ME')
-                        sMsg =['Cadet ID is wrong in ', sSubject ,' mail... Please check'];
-                        errordlg (sMsg)
-                    end
+                end
+%if strcmp(vAbsent(vHourId(iHour)+1),'2016ME')
+%                         sMsg =['Cadet ID is wrong in ', sSubject ,' mail... Please check'];
+%                         errordlg (sMsg)
+%                     end
                     for iAbsent = 2:size(vAbsent,1)
                         idx = strfind(vId,vAbsent{iAbsent});
                         if isempty(idx)
-                            errordlg ('Cadet file is not in correct format ... Please check')
+                            warning ('Absent cadet ID is not found')
                         end
                         %Logic find absent students in list
                         nIdx = not(cellfun('isempty',idx));
                         handles.mStudent{nIdx,vHourColumn(iHour)}=1;
+                        
                     end
-                end
+                    set(handles.uitable5,'data',handles.mStudent)
+%                end
             end
         end
     end
@@ -349,7 +353,7 @@ end
 %     fclose(fileID);
 % end
 % Calculate score of each candidate
- h = msgbox(sprintf('Total mail %d analysed ...',nCount));
+h = msgbox(sprintf('Total mail %d analysed ...',nCount));
 mData = cell2mat(handles.mStudent(:,n600:end));
 [vRow,vCol] = find(mData==1);
 mScore = 2*ones(size(mData,1),2);
