@@ -137,11 +137,23 @@ end
                         
                         %% Retrieving last email
                         nCount = INBOX.Items.Count; %index of the most recent email.\
-                        for iMail =1: nCount
+                        %% Make list of arrived mail 
+                        
+                        for iMail =1 :nCount
                             email=INBOX.Items.Item(iMail); %imports the most recent email
                             
                             sSubject = email.get('Subject');
                             sBody = email.get('Body');
+                            mMailData{iMail,1}= sSubject;
+                            mMailData{iMail,2}=sBody;
+                        end
+                        save('MailData.mat','mMailData');
+                        
+                        for iMail =1: nCount
+                           
+                            
+                            sSubject =  mMailData{iMail,1};
+                            sBody = mMailData{iMail,2};
                             C = textscan(sSubject,'%s','Delimiter',',');
                             vSubject = cell (C{1,1});
                             sCourseYear= strcat(vSubject(1),vSubject(2));
