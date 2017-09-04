@@ -22,7 +22,7 @@ function varargout = TMIAttend(varargin)
 
 % Edit the above text to modify the response to help TMIAttend
 
-% Last Modified by GUIDE v2.5 25-Jul-2017 16:03:49
+% Last Modified by GUIDE v2.5 31-Aug-2017 09:00:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -130,6 +130,7 @@ function LoadAbsent_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 %%
+clc
 %% Connecting to Outlook
 outlook = actxserver('Outlook.Application');
 mapi=outlook.GetNamespace('mapi');
@@ -147,23 +148,53 @@ for iMail =1 :nCount
     mMailData{iMail,1}= sSubject;
     mMailData{iMail,2}=sBody;
 end
-save('MailData.mat','mMailData','nCount');
+% save('MailData.mat','mMailData','nCount');
+
 nAbsentCount =0;
+%% ----Create Individual mat file per date
 for iMail =1: nCount
-    
+   iMail = nCount; %DELETE ME 
+   
+    sSubject =  mMailData{iMail,1};
+%     disp(sSubject);
+    sBody = mMailData{iMail,2};
+    C = textscan(sSubject,'%s','Delimiter',',');
+    vSubject = cell (C{1,1});
+    sCourseYear= strcat(vSubject(1),vSubject(2));
+%     C = textscan(sBody,'%s','Delimiter',',');
+%     vAbsent = cell(C{1,1});
+    if strcmp(vSubject(1),'DNS')
+        if strcmp(vSubject(2),'1')
+            sDate = datestr(datenum(vSubject(3),'dd/mm/yyyy'));
+            sMatFile = fullfile(pwd,'MatData',[sDate,'.mat']);
+            save(sMatFile,'sBody');
+        else
+            sDate = datestr(datenum(vSubject(2),'dd/mm/yyyy'));
+            sMatFile = fullfile(pwd,'MatData',[sDate,'.mat']);
+            save(sMatFile,'sBody');
+        end
+    else
+        
+        sDate = datestr(datenum(vSubject(3),'dd/mm/yyyy'));
+        sMatFile = fullfile(pwd,'MatData',[sDate,'.mat']);
+        save(sMatFile,'sBody');
+    end
+%     fprintf('\n mail processed %d \t',iMail)
+end
+%%
+for iMail =1: nCount
+%       iMail =37;
     
     sSubject =  mMailData{iMail,1};
     sBody = mMailData{iMail,2};
+    
+    disp(sSubject);
+    disp(sBody);
     C = textscan(sSubject,'%s','Delimiter',',');
     vSubject = cell (C{1,1});
     sCourseYear= strcat(vSubject(1),vSubject(2));
     C = textscan(sBody,'%s','Delimiter',',');
     vAbsent = cell(C{1,1});
-    
-    %% Check if format of message is correct
-    %     for iChk=2:size(vAbsent,1)
-    %
-    %     end
     %% Skip loop if everybody is present
     if strcmpi(vAbsent(2),'NIL')
         nAbsentCount = nAbsentCount+1;
@@ -189,9 +220,9 @@ for iMail =1: nCount
             handles.mStudent(nRow:end,vHourColumn(1))={2};
             
         end
-        %%
         
-        sMatFile = 
+        %%
+        %         sMatFile =
         v0830 = [];
         v0930 = [];
         v1040 = [];
@@ -199,7 +230,7 @@ for iMail =1: nCount
         v1340 = [];
         v1440 = [];
         v1540 = [];
-        nHourID =1;
+        
         for iHours = 1:size(vAbsent,1)
             if strcmp(vAbsent(iHours),'0830')
                 sHourID = vAbsent(iHours);
@@ -272,7 +303,7 @@ for iMail =1: nCount
         
         
         %% Logic to make student absent
-        if ~isempty(v0830)
+         if ~isempty(v0830)
             handles.mStudent(nRow:end,n600+1)={2};
             for iAbsent =2:numel(v0830)
                 idx = strfind(vId,v0830{iAbsent});
@@ -410,6 +441,7 @@ for iMail =1: nCount
         %                                 end
         %                             end
     end
+    fprintf('\n mail processed %d \t',iMail)
 end
 
 
@@ -612,6 +644,29 @@ function popupmenu2_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function sStatusMessage_Callback(hObject, eventdata, handles)
+% hObject    handle to sStatusMessage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of sStatusMessage as text
+%        str2double(get(hObject,'String')) returns contents of sStatusMessage as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function sStatusMessage_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to sStatusMessage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
