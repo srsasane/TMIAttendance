@@ -137,24 +137,25 @@ mapi=outlook.GetNamespace('mapi');
 INBOX=mapi.GetDefaultFolder(6);
 
 %% Retrieving last email
-nCount = INBOX.Items.Count; %index of the most recent email.\
+% nCount = INBOX.Items.Count; %index of the most recent email.\
 %% Make list of arrived mail
-
-for iMail =1 :nCount
-    email=INBOX.Items.Item(iMail); %imports the most recent email
-    
-    sSubject = email.get('Subject');
-    sBody = email.get('Body');
-    mMailData{iMail,1}= sSubject;
-    mMailData{iMail,2}=sBody;
-end
-% save('MailData.mat','mMailData','nCount');
-
+% nProcessed = 1;
+% for iMail =1 :nCount
+%     email=INBOX.Items.Item(iMail); %imports the most recent email
+%     
+%     sSubject = email.get('Subject');
+%     sBody = email.get('Body');
+%     mMailData{iMail,1}= sSubject;
+%     mMailData{iMail,2}=sBody;
+% end
+%  save('MailData.mat','mMailData','nCount');
+load('MailData.mat')
+nProcessed = 1;
 nAbsentCount =0;
 %% ----Create Individual mat file per date
 for iMail =1: nCount
-   iMail = nCount; %DELETE ME 
-   
+%    iMail = nCount; %DELETE ME 
+   break;
     sSubject =  mMailData{iMail,1};
 %     disp(sSubject);
     sBody = mMailData{iMail,2};
@@ -182,9 +183,11 @@ for iMail =1: nCount
 %     fprintf('\n mail processed %d \t',iMail)
 end
 %%
+ n600 = 4;
+ 
 for iMail =1: nCount
-%       iMail =37;
-    
+      iMail =334;
+%     iMail
     sSubject =  mMailData{iMail,1};
     sBody = mMailData{iMail,2};
     
@@ -196,25 +199,29 @@ for iMail =1: nCount
     C = textscan(sBody,'%s','Delimiter',',');
     vAbsent = cell(C{1,1});
     %% Skip loop if everybody is present
-    if strcmpi(vAbsent(2),'NIL')
-        nAbsentCount = nAbsentCount+1;
-        break;
-    end
+%     if strcmpi(vAbsent(2),'NIL')
+%         nAbsentCount = nAbsentCount+1;
+%         continue;
+%     end
     %%
     
-    n600 = 4;
+   
     
     set(handles.uitable6,'data',vAbsent);
     vId = handles.mStudent(:,1);
     nRow = 1;
+    vCourse(iMail) =sCourseYear;
+        
     %% logic to update specific year
     if strcmp(sCourseYear,handles.sSheet)
+        disp(sCourseYear)
+        
         %% Logic to find hours in absent student list
         vHourId = zeros(1,8);
         vHourColumn= zeros(1,8);
         %% Logic that adds attendance of time slot 0600
         vHourColumn(1) = n600;
-        
+       
         if cellfun('isempty',handles.mStudent(nRow,n600))
             % Mark all student present for 0600 hours class
             handles.mStudent(nRow:end,vHourColumn(1))={2};
@@ -230,7 +237,8 @@ for iMail =1: nCount
         v1340 = [];
         v1440 = [];
         v1540 = [];
-        
+        % Update processed mail count.
+         nProcessed = 1+nProcessed;
         for iHours = 1:size(vAbsent,1)
             if strcmp(vAbsent(iHours),'0830')
                 sHourID = vAbsent(iHours);
@@ -306,9 +314,19 @@ for iMail =1: nCount
          if ~isempty(v0830)
             handles.mStudent(nRow:end,n600+1)={2};
             for iAbsent =2:numel(v0830)
-                idx = strfind(vId,v0830{iAbsent});
-                %Logic find absent students in list
-                nIdx = not(cellfun('isempty',idx));
+                if strcmpi(v0830{iAbsent},'NIL')
+                    break;
+                end
+                    nIdx = findStudentID(vId,v0830{iAbsent});
+%                 idx = strfind(vId,v0830{iAbsent});
+%                 
+%                 %Logic find absent students in list
+%                 nIdx = not(cellfun('isempty',idx));
+%                 if nnz(nIdx) == 0
+%                     v0830{iAbsent} = removeSpace(v0830{iAbsent});                 
+%                     idx = strfind(vId,v0830{iAbsent});   
+%                     nIdx = not(cellfun('isempty',idx));
+%                 end
                 handles.mStudent{nIdx,n600+1}=1;
             end
             set(handles.uitable5,'data',handles.mStudent)
@@ -316,9 +334,17 @@ for iMail =1: nCount
         if ~isempty(v0930)
             handles.mStudent(nRow:end,n600+2)={2};
             for iAbsent =2:numel(v0930)
+                if strcmpi(v0930{iAbsent},'NIL')
+                    break;
+                end
                 idx = strfind(vId,v0930{iAbsent});
                 %Logic find absent students in list
                 nIdx = not(cellfun('isempty',idx));
+                if nnz(nIdx) == 0
+                    v0930{iAbsent} = removeSpace(v0930{iAbsent});                 
+                    idx = strfind(vId,v0930{iAbsent});   
+                    nIdx = not(cellfun('isempty',idx));
+                end
                 handles.mStudent{nIdx,n600+2}=1;
             end
             set(handles.uitable5,'data',handles.mStudent)
@@ -326,9 +352,21 @@ for iMail =1: nCount
         if ~isempty(v1040)
             handles.mStudent(nRow:end,n600+3)={2};
             for iAbsent =2:numel(v1040)
-                idx = strfind(vId,v1040{iAbsent});
-                %Logic find absent students in list
-                nIdx = not(cellfun('isempty',idx));
+                if strcmpi(v1040{iAbsent},'NIL')
+                    break;
+                end
+            [nIdx,fSkip] = findStudentID(vId,v1040{iAbsent});
+            if fSkip ==1
+                disp(v1040{iAbsent})
+            end
+%                 idx = strfind(vId,v1040{iAbsent});
+%                 %Logic find absent students in list
+%                 nIdx = not(cellfun('isempty',idx));
+%                  if nnz(nIdx) == 0
+%                     v1040{iAbsent} = removeSpace(v1040{iAbsent});                 
+%                     idx = strfind(vId,v1040{iAbsent});   
+%                     nIdx = not(cellfun('isempty',idx));
+%                 end
                 handles.mStudent{nIdx,n600+3}=1;
             end
             set(handles.uitable5,'data',handles.mStudent)
@@ -336,9 +374,17 @@ for iMail =1: nCount
         if ~isempty(v1140)
             handles.mStudent(nRow:end,n600+4)={2};
             for iAbsent =2:numel(v1140)
+                if strcmpi(v1140{iAbsent},'NIL')
+                    break;
+                end
                 idx = strfind(vId,v1140{iAbsent});
                 %Logic find absent students in list
                 nIdx = not(cellfun('isempty',idx));
+                if nnz(nIdx) == 0
+                    v1140{iAbsent} = removeSpace(v1140{iAbsent});                 
+                    idx = strfind(vId,v1140{iAbsent});   
+                    nIdx = not(cellfun('isempty',idx));
+                end
                 handles.mStudent{nIdx,n600+4}=1;
             end
             set(handles.uitable5,'data',handles.mStudent)
@@ -346,9 +392,17 @@ for iMail =1: nCount
         if ~isempty(v1340)
             handles.mStudent(nRow:end,n600+5)={2};
             for iAbsent =2:numel(v1340)
+                 if strcmpi(v1340{iAbsent},'NIL')
+                    break;
+                end
                 idx = strfind(vId,v1340{iAbsent});
                 %Logic find absent students in list
                 nIdx = not(cellfun('isempty',idx));
+                if nnz(nIdx) == 0
+                    v1340{iAbsent} = removeSpace(v1340{iAbsent});                 
+                    idx = strfind(vId,v1340{iAbsent});   
+                    nIdx = not(cellfun('isempty',idx));
+                end
                 handles.mStudent{nIdx,n600+5}=1;
             end
             set(handles.uitable5,'data',handles.mStudent)
@@ -356,9 +410,17 @@ for iMail =1: nCount
         if ~isempty(v1440)
             handles.mStudent(nRow:end,n600+6)={2};
             for iAbsent =2:numel(v1440)
+                if strcmpi(v1440{iAbsent},'NIL')
+                    break;
+                end
                 idx = strfind(vId,v1440{iAbsent});
                 %Logic find absent students in list
                 nIdx = not(cellfun('isempty',idx));
+                if nnz(nIdx) == 0
+                    v1440{iAbsent} = removeSpace(v1440{iAbsent});                 
+                    idx = strfind(vId,v1440{iAbsent});   
+                    nIdx = not(cellfun('isempty',idx));
+                end
                 handles.mStudent{nIdx,n600+6}=1;
             end
             set(handles.uitable5,'data',handles.mStudent)
@@ -366,87 +428,29 @@ for iMail =1: nCount
         if ~isempty(v1540)
             handles.mStudent(nRow:end,n600+7)={2};
             for iAbsent =2:numel(v1540)
+                if strcmpi(v1540{iAbsent},'NIL')
+                    break;
+                end
                 idx = strfind(vId,v1540{iAbsent});
                 %Logic find absent students in list
                 nIdx = not(cellfun('isempty',idx));
+                if nnz(nIdx) == 0
+                    v1540{iAbsent} = removeSpace(v1540{iAbsent});                 
+                    idx = strfind(vId,v1540{iAbsent});   
+                    nIdx = not(cellfun('isempty',idx));
+                end
                 handles.mStudent{nIdx,n600+7}=1;
             end
             set(handles.uitable5,'data',handles.mStudent)
         end
-        %                             for iHour=1:size(vHourId,2)
-        %                                 if vHourId(iHour)~=0
-        %
-        %                                     if isequal(vHourId(iHour),1)&& isequal(iMail,1) % to display following messages once
-        %                                         %if isequal(vHourId(iHour),1)
-        %                                         if ~isempty(strfind(handles.mStudent(4),'ME'))
-        %                                             h = msgbox('You are updating Marine Engineering course attendance','TMI Attendance 1.2');
-        %
-        %                                         elseif~isempty(strfind(handles.mStudent(4),'NS'))
-        %                                             h = msgbox('You are updating Nautical Science course attendance','TMI Attendance 1.2');
-        %
-        %                                         elseif  ~isempty(strfind(handles.mStudent(4),'DNS'))
-        %                                             h = msgbox('You are updating Diploma in Nautical Science course attendance','TMI Attendance 1.2');
-        %
-        %                                         end
-        %                                     end
-        %                                     %if strcmp(vAbsent(vHourId(iHour)+1),'2016ME')
-        %                                     %                         sMsg =['Cadet ID is wrong in ', sSubject ,' mail... Please check'];
-        %                                     %                         errordlg (sMsg)
-        %
-        %
-        %                                     vLoopLimit = nonzeros(vHourId);
-        %                                     for iM =1:size(vLoopLimit,1)-1
-        %                                         vLectureAbsent= vAbsent(vLoopLimit(iM):vLoopLimit(iM+1)-1);
-        %                                         for iAbsent = 2: size(vLectureAbsent,1)
-        %                                             idx = strfind(vId,vLectureAbsent{iAbsent});
-        %                                             if isempty(idx)
-        %                                                 warning ('Absent cadet ID is not found')
-        %                                             end
-        %                                             %Logic find absent students in list
-        %                                             nIdx = not(cellfun('isempty',idx));
-        %                                             handles.mStudent{nIdx,vHourColumn(iHour)}=1;
-        %
-        %                                         end
-        %                                         set(handles.uitable5,'data',handles.mStudent)
-        %                                     end
-        %                                     if numel(vLoopLimit) >= 2
-        %                                         for iAbsent = vLoopLimit(end): size(vAbsent,1)
-        %                                             idx = strfind(vId,vAbsent{iAbsent});
-        %                                             if isempty(idx)
-        %                                                 warning ('Absent cadet ID is not found')
-        %                                             end
-        %                                             %Logic find absent students in list
-        %                                             nIdx = not(cellfun('isempty',idx));
-        %                                             handles.mStudent{nIdx,vHourColumn(iHour)}=1;
-        %
-        %                                         end
-        %                                         set(handles.uitable5,'data',handles.mStudent)
-        %                                     end
-        %
-        %                                     %% IF only one lecture attendace is sent
-        %                                     if vLoopLimit ==1
-        %                                         for iAbsent = 2: size(vAbsent,1)
-        %                                             idx = strfind(vId,vAbsent{iAbsent});
-        %                                             if isempty(idx)
-        %                                                 warning ('Absent cadet ID is not found')
-        %                                             end
-        %                                             %Logic find absent students in list
-        %                                             nIdx = not(cellfun('isempty',idx));
-        %                                             handles.mStudent{nIdx,vHourColumn(iHour)}=1;
-        %
-        %                                         end
-        %                                     end
-        %                                     set(handles.uitable5,'data',handles.mStudent)
-        %
-        %                                 end
-        %                             end
+       
     end
-    fprintf('\n mail processed %d \t',iMail)
+    fprintf('\n mail processed %d/%d \t',nProcessed,iMail)
 end
 
 
 % Calculate score of each candidate
-h = msgbox(sprintf('Total mail %d analysed ...',nCount));
+h = msgbox(sprintf('Total mail %d /%d analysed ...',nProcessed,nCount));
 mData = cell2mat(handles.mStudent(:,n600:end));
 [vRow,vCol] = find(mData==1);
 mScore = 2*ones(size(mData,1),2);
@@ -615,6 +619,8 @@ elseif handles.sSheet == 'NS1'
     [a, mStudent,cRawNS1]=xlsread(handles.ExcelFile,'NS1');
 elseif handles.sSheet == 'NS2'
     [a, mStudent,cRawNS2]=xlsread(handles.ExcelFile,'NS2');
+     vID =  cellstr(num2str(a));
+    mStudent(3:2+size(a,1),1) = vID;
 elseif handles.sSheet == 'DNS'
     [a, mStudent,cRawDNS]=xlsread(handles.ExcelFile,'DNS');
 else
