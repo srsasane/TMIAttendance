@@ -150,22 +150,22 @@ for iMail =1 :nCount
     mMailData{iMail,1}= sSubject;
     mMailData{iMail,2}=sBody;
 end
- save('MailData.mat','mMailData','nCount');
+save('MailData.mat','mMailData','nCount');
 %load('MailData.mat')
 nProcessed = 1;
 nAbsentCount =0;
 %% ----Create Individual mat file per date
 for iMail =1: nCount
-%    iMail = nCount; %DELETE ME 
-   break;
+    %    iMail = nCount; %DELETE ME
+    break;
     sSubject =  mMailData{iMail,1};
-%     disp(sSubject);
+    %     disp(sSubject);
     sBody = mMailData{iMail,2};
     C = textscan(sSubject,'%s','Delimiter',',');
     vSubject = cell (C{1,1});
     sCourseYear= strcat(vSubject(1),vSubject(2));
-%     C = textscan(sBody,'%s','Delimiter',',');
-%     vAbsent = cell(C{1,1});
+    %     C = textscan(sBody,'%s','Delimiter',',');
+    %     vAbsent = cell(C{1,1});
     if strcmp(vSubject(1),'DNS')
         if strcmp(vSubject(2),'1')
             sDate = datestr(datenum(vSubject(3),'dd/mm/yyyy'));
@@ -182,40 +182,18 @@ for iMail =1: nCount
         sMatFile = fullfile(pwd,'MatData',[sDate,'.mat']);
         save(sMatFile,'sBody');
     end
-%     fprintf('\n mail processed %d \t',iMail)
+    %     fprintf('\n mail processed %d \t',iMail)
 end
 %%
- n600 = 4;
- for iMail =1: nCount
-     sSubject =  mMailData{iMail,1};
-     C = textscan(sSubject,'%s','Delimiter',',');
-     vSubject = cell (C{1,1});
-     sCourseYear= strcat(vSubject(1),vSubject(2));
-     sCourseYear= cell2str(sCourseYear);
-     sCourseYear= sCourseYear(3:end-3);
+n600 = 4;
 
-%          disp(sCourseYear)
-         if strcmpi(sCourseYear,'ME1')
-             
-         elseif strcmpi(sCourseYear,'ME2')
-             
-         elseif strcmpi(sCourseYear,'NS1')
-         elseif strcmpi(sCourseYear,'NS2')
-         elseif strcmpi(sCourseYear,'DNS')
-            % disp(sCourseYear)
-         else
-            % disp(sCourseYear)
-         end
-         fprintf('\n iMail :%d , Course: %s \t %s',iMail,sCourseYear,sSubject)
-         
- end
- 
+
 for iMail =1: nCount
     %% update me
-%      iMail = 291 +1;
-       %%
-       
-%     iMail
+%          iMail = 739  +1;
+    %%
+    
+    %     iMail
     sSubject =  mMailData{iMail,1};
     sBody = mMailData{iMail,2};
     if strcmpi('ME,2,21/07/2017,RKG',sSubject)
@@ -228,38 +206,53 @@ for iMail =1: nCount
     sCourseYear= strcat(vSubject(1),vSubject(2));
     C = textscan(sBody,'%s','Delimiter',',');
     vAbsent = cell(C{1,1});
-    %% Skip loop if everybody is present
-%     if strcmpi(vAbsent(2),'NIL')
-%         nAbsentCount = nAbsentCount+1;
+    
+    %% Adjust course name when DNS
+    if strcmpi(sCourseYear,'ME1')
+        
 %         continue;
-%     end
+    elseif strcmpi(sCourseYear,'ME2')
+%         continue;
+    elseif strcmpi(sCourseYear,'NS1')
+%         continue;
+    elseif strcmpi(sCourseYear,'NS2')
+%         continue;
+    elseif strcmpi(sCourseYear,'DNS1')
+%         continue;
+        
+    else
+%         disp('hello')
+        sCourseYear = cell2str(sCourseYear);
+        sCourseYear=[sCourseYear(3:5),'1'];
+        
+%         disp(sCourseYear)
+    end
     %%
     
-   
     
     set(handles.uitable6,'data',vAbsent);
     vId = handles.mStudent(:,1);
     nRow = 1;
-    vCourse(iMail) =sCourseYear;
-         disp(sCourseYear)
-%          if strcmpi(sCourseYear,'ME1')
-%          elseif strcmpi(sCourseYear,'ME2')
-%              
-%          elseif strcmpi(sCourseYear,'NS1')
-%          elseif strcmpi(sCourseYear,'NS2')
-%              elseif strcmpi(sCourseYear,'DNS')
-%              
-%          end
+%     vCourse(iMail) =sCourseYear;
+    disp(sCourseYear)
+    %          if strcmpi(sCourseYear,'ME1')
+    %          elseif strcmpi(sCourseYear,'ME2')
+    %
+    %          elseif strcmpi(sCourseYear,'NS1')
+    %          elseif strcmpi(sCourseYear,'NS2')
+    %              elseif strcmpi(sCourseYear,'DNS')
+    %
+    %          end
     %% logic to update specific year
     if strcmpi(sCourseYear,handles.sSheet)
-%         disp(sCourseYear)
+        %         disp(sCourseYear)
         
         %% Logic to find hours in absent student list
         vHourId = zeros(1,8);
         vHourColumn= zeros(1,8);
         %% Logic that adds attendance of time slot 0600
         vHourColumn(1) = n600;
-       
+        
         if cellfun('isempty',handles.mStudent(nRow,n600))
             % Mark all student present for 0600 hours class
             handles.mStudent(nRow:end,vHourColumn(1))={2};
@@ -276,7 +269,7 @@ for iMail =1: nCount
         v1440 = [];
         v1540 = [];
         % Update processed mail count.
-         nProcessed = 1+nProcessed;
+        nProcessed = 1+nProcessed;
         for iHours = 1:size(vAbsent,1)
             if strcmp(vAbsent(iHours),'0830')
                 sHourID = vAbsent(iHours);
@@ -293,9 +286,9 @@ for iMail =1: nCount
             elseif strcmp(vAbsent(iHours),'1540')
                 sHourID = vAbsent(iHours);
             elseif strcmp(vAbsent(iHours),'1240')
-               
+                
                 error('Wrong HourID !!')
-              
+                
             end
             if strcmp(sHourID,'0830')
                 if strcmp(vAbsent(iHours),'0830')
@@ -352,7 +345,7 @@ for iMail =1: nCount
         
         
         %% Logic to make student absent
-         if ~isempty(v0830)
+        if ~isempty(v0830)
             handles.mStudent(nRow:end,n600+1)={2};
             for iAbsent =2:numel(v0830)
                 if strcmpi(v0830{iAbsent},'NIL')
@@ -400,11 +393,11 @@ for iMail =1: nCount
         if ~isempty(v1340)
             handles.mStudent(nRow:end,n600+5)={2};
             for iAbsent =2:numel(v1340)
-                 if strcmpi(v1340{iAbsent},'NIL')
+                if strcmpi(v1340{iAbsent},'NIL')
                     break;
-                 end
-                 nIdx = findStudentID(vId,v1340{iAbsent});
-                 handles.mStudent{nIdx,n600+5}=1;
+                end
+                nIdx = findStudentID(vId,v1340{iAbsent});
+                handles.mStudent{nIdx,n600+5}=1;
             end
             set(handles.uitable5,'data',handles.mStudent)
         end
@@ -431,7 +424,7 @@ for iMail =1: nCount
             set(handles.uitable5,'data',handles.mStudent)
         end
         
-%     elseif
+        %     elseif
         
     end
     fprintf('\n mail processed n Processed %d/ iMail %d \t',nProcessed,iMail)
@@ -597,21 +590,23 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(hObject,'String'));
 handles.sSheet= contents{get(hObject,'Value')};
-if handles.sSheet == 'ME1'
+
+if strcmpi(handles.sSheet, 'ME1')
     [a, mStudent,cRawME1]=xlsread(handles.ExcelFile,'ME1');
     
-elseif handles.sSheet == 'ME2'
+elseif strcmpi(handles.sSheet, 'ME2')
     [a, mStudent,cRawME2]=xlsread(handles.ExcelFile,'ME2');
     vID =  cellstr(num2str(a));
     mStudent(3:2+size(a,1),1) = vID;
-elseif handles.sSheet == 'NS1'
+elseif strcmpi(handles.sSheet, 'NS1')
     [a, mStudent,cRawNS1]=xlsread(handles.ExcelFile,'NS1');
-elseif handles.sSheet == 'NS2'
+elseif strcmpi(handles.sSheet, 'NS2')
     [a, mStudent,cRawNS2]=xlsread(handles.ExcelFile,'NS2');
-     vID =  cellstr(num2str(a));
+    vID =  cellstr(num2str(a));
     mStudent(3:2+size(a,1),1) = vID;
-elseif handles.sSheet == 'DNS'
-    [a, mStudent,cRawDNS]=xlsread(handles.ExcelFile,'DNS');
+elseif strcmpi(handles.sSheet(1:3), 'DNS')
+    [a, mStudent,cRawDNS]=xlsread(handles.ExcelFile,'DNS1');
+    handles.sSheet = 'DNS1';
 else
     [a, mStudent,cRawME1]=xlsread(handles.ExcelFile,'ME1');
 end
