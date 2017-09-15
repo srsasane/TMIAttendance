@@ -22,7 +22,7 @@ function varargout = TMIAttend(varargin)
 
 % Edit the above text to modify the response to help TMIAttend
 
-% Last Modified by GUIDE v2.5 31-Aug-2017 09:00:37
+% Last Modified by GUIDE v2.5 14-Sep-2017 09:19:15
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -131,6 +131,8 @@ function LoadAbsent_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %%
 clc
+set(handles.sStatusMessage,'BackgroundColor','Blue');
+set(handles.sStatusMessage,'ForegroundColor','White');
 %% Connecting to Outlook
 outlook = actxserver('Outlook.Application');
 mapi=outlook.GetNamespace('mapi');
@@ -140,6 +142,9 @@ INBOX=mapi.GetDefaultFolder(6);
 nCount = INBOX.Items.Count; %index of the most recent email.\
 fprintf('\nTotal %d mails fethced....',nCount);
 fprintf('\nProcessing mails please wait....\n');
+sStatusMsg = sprintf('\nTotal %d mails fethced....',nCount);
+set(handles.sStatusMessage,'String',sStatusMsg);
+pause(0.01);
 %% Make list of arrived mail
 % nProcessed = 1;
 for iMail =1 :nCount
@@ -159,13 +164,12 @@ for iMail =1: nCount
     %    iMail = nCount; %DELETE ME
     break;
     sSubject =  mMailData{iMail,1};
-    %     disp(sSubject);
+    
     sBody = mMailData{iMail,2};
     C = textscan(sSubject,'%s','Delimiter',',');
     vSubject = cell (C{1,1});
     sCourseYear= strcat(vSubject(1),vSubject(2));
-    %     C = textscan(sBody,'%s','Delimiter',',');
-    %     vAbsent = cell(C{1,1});
+    
     if strcmp(vSubject(1),'DNS')
         if strcmp(vSubject(2),'1')
             sDate = datestr(datenum(vSubject(3),'dd/mm/yyyy'));
@@ -190,15 +194,15 @@ n600 = 4;
 
 for iMail =1: nCount
     %% update me
-%          iMail = 739  +1;
+    %     iMail = 2100 +1;
     %%
     
     %     iMail
     sSubject =  mMailData{iMail,1};
     sBody = mMailData{iMail,2};
-    if strcmpi('ME,2,21/07/2017,RKG',sSubject)
-        disp('Hello');
-    end
+    %     set(handles.CommandWindow,'String',sBody);
+    %     set(handles.sStatusMessage,'String',sSubject);
+    %     pause(0.1);
     disp(sSubject);
     disp(sBody);
     C = textscan(sSubject,'%s','Delimiter',',');
@@ -210,22 +214,22 @@ for iMail =1: nCount
     %% Adjust course name when DNS
     if strcmpi(sCourseYear,'ME1')
         
-%         continue;
+        %         continue;
     elseif strcmpi(sCourseYear,'ME2')
-%         continue;
+        %         continue;
     elseif strcmpi(sCourseYear,'NS1')
-%         continue;
+        %         continue;
     elseif strcmpi(sCourseYear,'NS2')
-%         continue;
+        %         continue;
     elseif strcmpi(sCourseYear,'DNS1')
-%         continue;
+        %         continue;
         
     else
-%         disp('hello')
+        %         disp('hello')
         sCourseYear = cell2str(sCourseYear);
         sCourseYear=[sCourseYear(3:5),'1'];
         
-%         disp(sCourseYear)
+        %         disp(sCourseYear)
     end
     %%
     
@@ -233,7 +237,7 @@ for iMail =1: nCount
     set(handles.uitable6,'data',vAbsent);
     vId = handles.mStudent(:,1);
     nRow = 1;
-%     vCourse(iMail) =sCourseYear;
+    %     vCourse(iMail) =sCourseYear;
     disp(sCourseYear)
     %          if strcmpi(sCourseYear,'ME1')
     %          elseif strcmpi(sCourseYear,'ME2')
@@ -428,6 +432,9 @@ for iMail =1: nCount
         
     end
     fprintf('\n mail processed n Processed %d/ iMail %d \t',nProcessed,iMail)
+    sStatusMsg=sprintf('%s ... %d/ / %d',sSubject,nProcessed,nCount);
+    set(handles.sStatusMessage,'String',sStatusMsg);
+    pause(0.01);
 end
 
 
@@ -653,6 +660,29 @@ function sStatusMessage_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function sStatusMessage_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to sStatusMessage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','Blue');
+end
+
+
+
+function CommandWindow_Callback(hObject, eventdata, handles)
+% hObject    handle to CommandWindow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of CommandWindow as text
+%        str2double(get(hObject,'String')) returns contents of CommandWindow as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function CommandWindow_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to CommandWindow (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
