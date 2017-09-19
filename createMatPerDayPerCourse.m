@@ -14,18 +14,20 @@ for iMail =1: nCount
         if strcmp(vSubject(2),'1')
             sDate = datestr(datenum(vSubject(3),'dd/mm/yyyy'));
             sMatFile = fullfile(pwd,'MatData',sCourseYear,[sCourseYear,sDate,'.mat']);
-            save(sMatFile,'sBody');
+            saveMatFile(sMatFile,sBody);
         else
             sDate = datestr(datenum(vSubject(2),'dd/mm/yyyy'));
             sMatFile = fullfile(pwd,'MatData',sCourseYear,[sCourseYear,sDate,'.mat']);
-            save(sMatFile,'sBody');
+            saveMatFile(sMatFile,sBody);
         end
        
     else
         
         sDate = datestr(datenum(vSubject(3),'dd/mm/yyyy'));
+        
         sMatFile = fullfile(pwd,'MatData',sCourseYear,[sCourseYear,sDate,'.mat']);
-        save(sMatFile,'sBody');
+        saveMatFile(sMatFile,sBody);
+        
         fprintf('Mail Processed %d/%d \n',iMail,nCount);
         fprintf('%s File created \n',sMatFile);
     end
@@ -33,4 +35,5 @@ for iMail =1: nCount
     
     %     fprintf('\n mail processed %d \t',iMail)
 end
+
 end

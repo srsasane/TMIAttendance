@@ -133,62 +133,23 @@ function LoadAbsent_Callback(hObject, eventdata, handles)
 clc
 set(handles.sStatusMessage,'BackgroundColor','Blue');
 set(handles.sStatusMessage,'ForegroundColor','White');
-%% Connecting to Outlook
-outlook = actxserver('Outlook.Application');
-mapi=outlook.GetNamespace('mapi');
-INBOX=mapi.GetDefaultFolder(6);
 
-%% Retrieving last email
-nCount = INBOX.Items.Count; %index of the most recent email.\
-fprintf('\nTotal %d mails fethced....',nCount);
-fprintf('\nProcessing mails please wait....\n');
+%% Make list of arrived mail
+%  loadMail()
+ addpath(pwd);
+ savepath;
+load('MailData.mat')
 sStatusMsg = sprintf('\nTotal %d mails fethced....',nCount);
 set(handles.sStatusMessage,'String',sStatusMsg);
 pause(0.01);
-%% Make list of arrived mail
-% nProcessed = 1;
-for iMail =1 :nCount
-    email=INBOX.Items.Item(iMail); %imports the most recent email
-    
-    sSubject = email.get('Subject');
-    sBody = email.get('Body');
-    mMailData{iMail,1}= sSubject;
-    mMailData{iMail,2}=sBody;
-end
-save('MailData.mat','mMailData','nCount');
-%load('MailData.mat')
 nProcessed = 1;
 nAbsentCount =0;
-%% ----Create Individual mat file per date
-for iMail =1: nCount
-    %    iMail = nCount; %DELETE ME
-    break;
-    sSubject =  mMailData{iMail,1};
-    
-    sBody = mMailData{iMail,2};
-    C = textscan(sSubject,'%s','Delimiter',',');
-    vSubject = cell (C{1,1});
-    sCourseYear= strcat(vSubject(1),vSubject(2));
-    
-    if strcmp(vSubject(1),'DNS')
-        if strcmp(vSubject(2),'1')
-            sDate = datestr(datenum(vSubject(3),'dd/mm/yyyy'));
-            sMatFile = fullfile(pwd,'MatData',[sDate,'.mat']);
-            save(sMatFile,'sBody');
-        else
-            sDate = datestr(datenum(vSubject(2),'dd/mm/yyyy'));
-            sMatFile = fullfile(pwd,'MatData',[sDate,'.mat']);
-            save(sMatFile,'sBody');
-        end
-    else
-        
-        sDate = datestr(datenum(vSubject(3),'dd/mm/yyyy'));
-        sMatFile = fullfile(pwd,'MatData',[sDate,'.mat']);
-        save(sMatFile,'sBody');
-    end
-    %     fprintf('\n mail processed %d \t',iMail)
-end
-%%
+% createMatPerDayPerCourse();
+sME1 = dir(fullfile(pwd,'MatData','ME1'));
+sME2 = dir(fullfile(pwd,'MatData','ME2'));
+sNS1 = dir(fullfile(pwd,'MatData','NS1'));
+sNS2 = dir(fullfile(pwd,'MatData','NS2'));
+sDNS1 =dir( fullfile(pwd,'MatData','DNS1'));
 n600 = 4;
 
 
@@ -200,9 +161,6 @@ for iMail =1: nCount
     %     iMail
     sSubject =  mMailData{iMail,1};
     sBody = mMailData{iMail,2};
-    %     set(handles.CommandWindow,'String',sBody);
-    %     set(handles.sStatusMessage,'String',sSubject);
-    %     pause(0.1);
     disp(sSubject);
     disp(sBody);
     C = textscan(sSubject,'%s','Delimiter',',');
@@ -213,8 +171,7 @@ for iMail =1: nCount
     
     %% Adjust course name when DNS
     if strcmpi(sCourseYear,'ME1')
-        
-        %         continue;
+               %         continue;
     elseif strcmpi(sCourseYear,'ME2')
         %         continue;
     elseif strcmpi(sCourseYear,'NS1')
@@ -239,14 +196,7 @@ for iMail =1: nCount
     nRow = 1;
     %     vCourse(iMail) =sCourseYear;
     disp(sCourseYear)
-    %          if strcmpi(sCourseYear,'ME1')
-    %          elseif strcmpi(sCourseYear,'ME2')
-    %
-    %          elseif strcmpi(sCourseYear,'NS1')
-    %          elseif strcmpi(sCourseYear,'NS2')
-    %              elseif strcmpi(sCourseYear,'DNS')
-    %
-    %          end
+   
     %% logic to update specific year
     if strcmpi(sCourseYear,handles.sSheet)
         %         disp(sCourseYear)
@@ -262,93 +212,12 @@ for iMail =1: nCount
             handles.mStudent(nRow:end,vHourColumn(1))={2};
             
         end
-        
-        %%
-        %         sMatFile =
-        v0830 = [];
-        v0930 = [];
-        v1040 = [];
-        v1140 = [];
-        v1340 = [];
-        v1440 = [];
-        v1540 = [];
-        % Update processed mail count.
-        nProcessed = 1+nProcessed;
-        for iHours = 1:size(vAbsent,1)
-            if strcmp(vAbsent(iHours),'0830')
-                sHourID = vAbsent(iHours);
-            elseif strcmp(vAbsent(iHours),'0930')
-                sHourID = vAbsent(iHours);
-            elseif strcmp(vAbsent(iHours),'1040')
-                sHourID = vAbsent(iHours);
-            elseif strcmp(vAbsent(iHours),'1140')
-                sHourID = vAbsent(iHours);
-            elseif strcmp(vAbsent(iHours),'1340')
-                sHourID = vAbsent(iHours);
-            elseif strcmp(vAbsent(iHours),'1440')
-                sHourID = vAbsent(iHours);
-            elseif strcmp(vAbsent(iHours),'1540')
-                sHourID = vAbsent(iHours);
-            elseif strcmp(vAbsent(iHours),'1240')
-                
-                error('Wrong HourID !!')
-                
-            end
-            if strcmp(sHourID,'0830')
-                if strcmp(vAbsent(iHours),'0830')
-                    
-                    idx0830 = 1;
-                end
-                v0830{idx0830} = vAbsent(iHours);
-                idx0830 = idx0830+1;
-            elseif strcmp(sHourID,'0930')
-                if strcmp(vAbsent(iHours),'0930')
-                    
-                    idx0930 = 1;
-                end
-                v0930{idx0930} = vAbsent(iHours);
-                idx0930 = idx0930+1;
-            elseif strcmp(sHourID,'1040')
-                if strcmp(vAbsent(iHours),'1040')
-                    
-                    idx1040 = 1;
-                end
-                v1040{idx1040} = vAbsent(iHours);
-                idx1040 = idx1040+1;
-            elseif strcmp(sHourID,'1140')
-                if strcmp(vAbsent(iHours),'1140')
-                    
-                    idx1140 = 1;
-                end
-                v1140{idx1140} = vAbsent(iHours);
-                idx1140 = idx1140 +1;
-                
-            elseif strcmp(sHourID,'1340')
-                if strcmp(vAbsent(iHours),'1340')
-                    
-                    idx1340 =1;
-                end
-                v1340{idx1340} = vAbsent(iHours);
-                idx1340 = idx1340+1;
-            elseif strcmp(sHourID,'1440')
-                if strcmp(vAbsent(iHours),'1440')
-                    
-                    idx1440 = 1;
-                end
-                v1440{idx1440} = vAbsent(iHours);
-                idx1440 = idx1440+1;
-            elseif strcmp(sHourID,'1540')
-                if strcmp(vAbsent(iHours),'1540')
-                    
-                    idx1540 = 1;
-                end
-                v1540{idx1540} = vAbsent(iHours);
-                idx1540 = idx1540 +1;
-            end
-        end
-        
+         nProcessed = 1+nProcessed;
+         [v0830,v0930,v1040,v1140,v1340,v1440,v1540 ] = segregateAbsent(vAbsent);
+
         
         %% Logic to make student absent
+        
         if ~isempty(v0830)
             handles.mStudent(nRow:end,n600+1)={2};
             for iAbsent =2:numel(v0830)
