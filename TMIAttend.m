@@ -135,203 +135,129 @@ set(handles.sStatusMessage,'BackgroundColor','Blue');
 set(handles.sStatusMessage,'ForegroundColor','White');
 
 %% Make list of arrived mail
-%  loadMail()
- addpath(pwd);
- savepath;
+sStatusMsg = sprintf('\nFetching mails....');
+set(handles.sStatusMessage,'String',sStatusMsg);
+% loadMail()
+addpath(pwd);
+savepath;
 load('MailData.mat')
 sStatusMsg = sprintf('\nTotal %d mails fethced....',nCount);
 set(handles.sStatusMessage,'String',sStatusMsg);
 pause(0.01);
 nProcessed = 1;
 nAbsentCount =0;
+pause(0.01);
+sStatusMsg = sprintf('\nCreating file per day....',nCount);
+set(handles.sStatusMessage,'String',sStatusMsg);
+pause(0.02);
+%%Create M files per day
 % createMatPerDayPerCourse();
-sME1 = dir(fullfile(pwd,'MatData','ME1'));
-sME2 = dir(fullfile(pwd,'MatData','ME2'));
-sNS1 = dir(fullfile(pwd,'MatData','NS1'));
-sNS2 = dir(fullfile(pwd,'MatData','NS2'));
-sDNS1 =dir( fullfile(pwd,'MatData','DNS1'));
+%%
 n600 = 4;
-
-
-for iMail =1: nCount
-    %% update me
-    %     iMail = 2100 +1;
-    %%
-    
-    %     iMail
-    sSubject =  mMailData{iMail,1};
-    sBody = mMailData{iMail,2};
-    disp(sSubject);
-    disp(sBody);
-    C = textscan(sSubject,'%s','Delimiter',',');
-    vSubject = cell (C{1,1});
-    sCourseYear= strcat(vSubject(1),vSubject(2));
-    C = textscan(sBody,'%s','Delimiter',',');
-    vAbsent = cell(C{1,1});
-    
-    %% Adjust course name when DNS
-    if strcmpi(sCourseYear,'ME1')
-               %         continue;
-    elseif strcmpi(sCourseYear,'ME2')
-        %         continue;
-    elseif strcmpi(sCourseYear,'NS1')
-        %         continue;
-    elseif strcmpi(sCourseYear,'NS2')
-        %         continue;
-    elseif strcmpi(sCourseYear,'DNS1')
-        %         continue;
-        
-    else
-        %         disp('hello')
-        sCourseYear = cell2str(sCourseYear);
-        sCourseYear=[sCourseYear(3:5),'1'];
-        
-        %         disp(sCourseYear)
-    end
-    %%
+%% ME1 Attendance calculation
+handles = guidata(hObject);
+if strcmpi(handles.sSheet,'ME1')
     
     
-    set(handles.uitable6,'data',vAbsent);
-    vId = handles.mStudent(:,1);
-    nRow = 1;
-    %     vCourse(iMail) =sCourseYear;
-    disp(sCourseYear)
-   
-    %% logic to update specific year
-    if strcmpi(sCourseYear,handles.sSheet)
-        %         disp(sCourseYear)
-        
-        %% Logic to find hours in absent student list
-        vHourId = zeros(1,8);
-        vHourColumn= zeros(1,8);
-        %% Logic that adds attendance of time slot 0600
-        vHourColumn(1) = n600;
-        
-        if cellfun('isempty',handles.mStudent(nRow,n600))
-            % Mark all student present for 0600 hours class
-            handles.mStudent(nRow:end,vHourColumn(1))={2};
-            
-        end
-         nProcessed = 1+nProcessed;
-         [v0830,v0930,v1040,v1140,v1340,v1440,v1540 ] = segregateAbsent(vAbsent);
-
-        
-        %% Logic to make student absent
-        
-        if ~isempty(v0830)
-            handles.mStudent(nRow:end,n600+1)={2};
-            for iAbsent =2:numel(v0830)
-                if strcmpi(v0830{iAbsent},'NIL')
-                    break;
-                end
-                nIdx = findStudentID(vId,v0830{iAbsent});
-                
-                handles.mStudent{nIdx,n600+1}=1;
-            end
-            set(handles.uitable5,'data',handles.mStudent)
-        end
-        if ~isempty(v0930)
-            handles.mStudent(nRow:end,n600+2)={2};
-            for iAbsent =2:numel(v0930)
-                if strcmpi(v0930{iAbsent},'NIL')
-                    break;
-                end
-                nIdx = findStudentID(vId,v0930{iAbsent});
-                handles.mStudent{nIdx,n600+2}=1;
-            end
-            set(handles.uitable5,'data',handles.mStudent)
-        end
-        if ~isempty(v1040)
-            handles.mStudent(nRow:end,n600+3)={2};
-            for iAbsent =2:numel(v1040)
-                if strcmpi(v1040{iAbsent},'NIL')
-                    break;
-                end
-                nIdx = findStudentID(vId,v1040{iAbsent});
-                handles.mStudent{nIdx,n600+3}=1;
-            end
-            set(handles.uitable5,'data',handles.mStudent)
-        end
-        if ~isempty(v1140)
-            handles.mStudent(nRow:end,n600+4)={2};
-            for iAbsent =2:numel(v1140)
-                if strcmpi(v1140{iAbsent},'NIL')
-                    break;
-                end
-                nIdx = findStudentID(vId,v1140{iAbsent});
-                handles.mStudent{nIdx,n600+4}=1;
-            end
-            set(handles.uitable5,'data',handles.mStudent)
-        end
-        if ~isempty(v1340)
-            handles.mStudent(nRow:end,n600+5)={2};
-            for iAbsent =2:numel(v1340)
-                if strcmpi(v1340{iAbsent},'NIL')
-                    break;
-                end
-                nIdx = findStudentID(vId,v1340{iAbsent});
-                handles.mStudent{nIdx,n600+5}=1;
-            end
-            set(handles.uitable5,'data',handles.mStudent)
-        end
-        if ~isempty(v1440)
-            handles.mStudent(nRow:end,n600+6)={2};
-            for iAbsent =2:numel(v1440)
-                if strcmpi(v1440{iAbsent},'NIL')
-                    break;
-                end
-                nIdx = findStudentID(vId,v1440{iAbsent});
-                handles.mStudent{nIdx,n600+6}=1;
-            end
-            set(handles.uitable5,'data',handles.mStudent)
-        end
-        if ~isempty(v1540)
-            handles.mStudent(nRow:end,n600+7)={2};
-            for iAbsent =2:numel(v1540)
-                if strcmpi(v1540{iAbsent},'NIL')
-                    break;
-                end
-                nIdx = findStudentID(vId,v1540{iAbsent});
-                handles.mStudent{nIdx,n600+7}=1;
-            end
-            set(handles.uitable5,'data',handles.mStudent)
-        end
-        
-        %     elseif
-        
-    end
-    fprintf('\n mail processed n Processed %d/ iMail %d \t',nProcessed,iMail)
-    sStatusMsg=sprintf('%s ... %d/ / %d',sSubject,nProcessed,nCount);
+    sCourseName = handles.sSheet;
+    sStruct = dir(fullfile(pwd,'MatData',sCourseName));
+    nDays = numel(sStruct);
+  
+    sStatusMsg=sprintf('Processing Course : %s ...Total Days : %d',sCourseName,nDays);
     set(handles.sStatusMessage,'String',sStatusMsg);
     pause(0.01);
+    handles.mStudent = genReport(sStruct,handles.mStudent,sCourseName,n600,handles);
+    sReportFileName = [date,sCourseName,'.xlsx'];
+    set(handles.uitable5,'data',handles.mStudent)
+    [FileName,PathName] = uiputfile('*.xlsx','save attendance file as ...');
+    mData = [handles.mStudent(:,1:3),handles.mStudent(:,end)];
+    handles.SaveFile=fullfile(PathName,sReportFileName);
+    mData{1,1}=nDays;
+    xlswrite(handles.SaveFile,mData);
+    % save(handles.SaveFile,'handles.mStudent');
+    %% ME2 Attendance calculation
+elseif strcmpi(handles.sSheet,'ME2')
+    sCourseName = handles.sSheet;
+    sStruct = dir(fullfile(pwd,'MatData',sCourseName));
+    nDays = numel(sStruct);
+     
+    sStatusMsg=sprintf('Processing Course : %s ...Total Days : %d',sCourseName,nDays);
+    set(handles.sStatusMessage,'String',sStatusMsg);
+    pause(0.01);
+    handles.mStudent = genReport(sStruct,handles.mStudent,sCourseName,n600);
+    sReportFileName = [date,sCourseName,'.xlsx'];
+    set(handles.uitable5,'data',handles.mStudent)
+    [FileName,PathName] = uiputfile('*.xlsx','save attendance file as ...');
+    handles.SaveFile=fullfile(PathName,sReportFileName);
+    mData = [handles.mStudent(:,1:3),handles.mStudent(:,end)];
+     mData{1,1}=nDays;
+    xlswrite(handles.SaveFile,mData);
+    %% NS1 Attendance Calculation
+elseif strcmpi(handles.sSheet,'NS1')
+    sCourseName = handles.sSheet;
+    sStruct = dir(fullfile(pwd,'MatData',sCourseName));
+    nDays = numel(sStruct);
+    
+    sStatusMsg=sprintf('Processing Course : %s ...Total Days : %d',sCourseName,nDays);
+    set(handles.sStatusMessage,'String',sStatusMsg);
+    pause(0.01);
+    handles.mStudent = genReport(sStruct,handles.mStudent,sCourseName,n600);
+    sReportFileName = [date,sCourseName,'.xlsx'];
+    set(handles.uitable5,'data',handles.mStudent)
+    [FileName,PathName] = uiputfile('*.xlsx','save attendance file as ...');
+    handles.SaveFile=fullfile(PathName,sReportFileName);
+    mData = [handles.mStudent(:,1:3),handles.mStudent(:,end)];
+     mData{1,1}=nDays;
+    xlswrite(handles.SaveFile,mData);
+    %% NS2 Attendance Calculation
+elseif strcmpi(handles.sSheet,'NS2')
+    sCourseName = handles.sSheet;
+    sStruct = dir(fullfile(pwd,'MatData',sCourseName));
+    nDays = numel(sStruct);
+    
+    sStatusMsg=sprintf('Processing Course : %s ...Total Days : %d',sCourseName,nDays);
+    set(handles.sStatusMessage,'String',sStatusMsg);
+    pause(0.01);
+    handles.mStudent = genReport(sStruct,handles.mStudent,sCourseName,n600);
+    sReportFileName = [date,sCourseName,'.xlsx'];
+    set(handles.uitable5,'data',handles.mStudent)
+    [FileName,PathName] = uiputfile('*.xlsx','save attendance file as ...');
+    handles.SaveFile=fullfile(PathName,sReportFileName);
+    mData = [handles.mStudent(:,1:3),handles.mStudent(:,end)];
+    mData{1,1}=nDays;
+    xlswrite(handles.SaveFile,mData);
+    %%
+else
+    sCourseName = 'DNS1';
+    sStruct = dir(fullfile(pwd,'MatData',sCourseName));
+    nDays = numel(sStruct);
+    
+    sStatusMsg=sprintf('Processing Course : %s ...Total Days : %d',sCourseName,nDays);
+    set(handles.sStatusMessage,'String',sStatusMsg);
+    pause(0.01);
+    handles.mStudent = genReport(sStruct,handles.mStudent,sCourseName,n600);
+    sReportFileName = [date,sCourseName,'.xlsx'];
+    set(handles.uitable5,'data',handles.mStudent)
+    [FileName,PathName] = uiputfile('*.xlsx','save attendance file as ...');
+    handles.SaveFile=fullfile(PathName,sReportFileName);
+    mData = [handles.mStudent(:,1:3),handles.mStudent(:,end)];
+    mData{1,1}=nDays;
+    xlswrite(handles.SaveFile,mData);
+    %%
 end
+
+%fprintf('\n mail processed n Processed %d/ iMail %d \t',nProcessed,iMail)
+%sStatusMsg=sprintf('%s ... %d/ / %d',sSubject,nProcessed,nCount);
+%set(handles.sStatusMessage,'String',sStatusMsg);
+%pause(0.01);
+
 
 
 % Calculate score of each candidate
-h = msgbox(sprintf('Total mail %d /%d analysed ...',nProcessed,nCount));
-mData = cell2mat(handles.mStudent(:,n600:end));
-[vRow,vCol] = find(mData==1);
-mScore = 2*ones(size(mData,1),2);
+h = msgbox(sprintf('Report File %s generated successfully',sReportFileName));
+%% THE END %%
 
-for iRow = 1:numel(vRow)
-    
-    if vCol(iRow) < 4    % forenoon session absent
-        mScore(vRow(iRow), 1) = 1;
-        
-    else   % afternoon session absent
-        mScore(vRow(iRow),2)= 1;
-        
-        
-    end
-end
-vScore = sum(mScore,2);
-if ~ exist('handles.vScore', 'var')
-    handles.vScore = zeros(size(vScore));
-end
 
-handles.vScore = handles.vScore+vScore;
-handles.mStudent(:,end)=num2cell(handles.vScore);
-set(handles.uitable5,'data',handles.mStudent)
 
 guidata(hObject, handles);
 
@@ -466,7 +392,9 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(hObject,'String'));
 handles.sSheet= contents{get(hObject,'Value')};
-
+sStatusMsg=sprintf('Processing course : %s ',handles.sSheet);
+set(handles.sStatusMessage,'String',sStatusMsg);
+pause(0.01);
 if strcmpi(handles.sSheet, 'ME1')
     [a, mStudent,cRawME1]=xlsread(handles.ExcelFile,'ME1');
     

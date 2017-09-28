@@ -14,7 +14,7 @@ for iCell =1:numel(cBody)
         
         if cellfun('isempty',mStudent(nRow,n600))
             % Mark all student present for 0600 hours class
-           mStudent(nRow:end,n600)={2};
+           mStudent(nRow:end,n600)={1};
             
         end
 %         nProcessed = 1+nProcessed;
@@ -24,82 +24,82 @@ for iCell =1:numel(cBody)
         %% Logic to make student absent
         
         if ~isempty(v0830)
-           mStudent(nRow:end,n600+1)={2};
+           mStudent(nRow:end,n600+1)={1};
             for iAbsent =2:numel(v0830)
                 if strcmpi(v0830{iAbsent},'NIL')
                     break;
                 end
                 nIdx = findStudentID(vId,v0830{iAbsent});
                 
-               mStudent{nIdx,n600+1}=1;
+               mStudent{nIdx,n600+1}=0;
             end
-           % set(handles.uitable5,'data',handles.mStudent)
+%             set(handles.uitable5,'data',handles.mStudent)
         end
         if ~isempty(v0930)
-           mStudent(nRow:end,n600+2)={2};
+           mStudent(nRow:end,n600+2)={1};
             for iAbsent =2:numel(v0930)
                 if strcmpi(v0930{iAbsent},'NIL')
                     break;
                 end
                 nIdx = findStudentID(vId,v0930{iAbsent});
-               mStudent{nIdx,n600+2}=1;
+               mStudent{nIdx,n600+2}=0;
             end
 %             set(handles.uitable5,'data',handles.mStudent)
         end
         if ~isempty(v1040)
-           mStudent(nRow:end,n600+3)={2};
+           mStudent(nRow:end,n600+3)={1};
             for iAbsent =2:numel(v1040)
                 if strcmpi(v1040{iAbsent},'NIL')
                     break;
                 end
                 nIdx = findStudentID(vId,v1040{iAbsent});
-               mStudent{nIdx,n600+3}=1;
+               mStudent{nIdx,n600+3}=0;
             end
-           % set(handles.uitable5,'data',handles.mStudent)
+%             set(handles.uitable5,'data',handles.mStudent)
         end
         if ~isempty(v1140)
-           mStudent(nRow:end,n600+4)={2};
+           mStudent(nRow:end,n600+4)={1};
             for iAbsent =2:numel(v1140)
                 if strcmpi(v1140{iAbsent},'NIL')
                     break;
                 end
                 nIdx = findStudentID(vId,v1140{iAbsent});
-               mStudent{nIdx,n600+4}=1;
+               mStudent{nIdx,n600+4}=0;
             end
-           % set(handles.uitable5,'data',handles.mStudent)
+%             set(handles.uitable5,'data',handles.mStudent)
         end
         if ~isempty(v1340)
-           mStudent(nRow:end,n600+5)={2};
+           mStudent(nRow:end,n600+5)={1};
             for iAbsent =2:numel(v1340)
                 if strcmpi(v1340{iAbsent},'NIL')
                     break;
                 end
                 nIdx = findStudentID(vId,v1340{iAbsent});
-               mStudent{nIdx,n600+5}=1;
+               mStudent{nIdx,n600+5}=0;
             end
-            %set(handles.uitable5,'data',handles.mStudent)
+%             set(handles.uitable5,'data',handles.mStudent)
         end
         if ~isempty(v1440)
-           mStudent(nRow:end,n600+6)={2};
+           mStudent(nRow:end,n600+6)={1};
             for iAbsent =2:numel(v1440)
                 if strcmpi(v1440{iAbsent},'NIL')
                     break;
                 end
                 nIdx = findStudentID(vId,v1440{iAbsent});
-               mStudent{nIdx,n600+6}=1;
+               mStudent{nIdx,n600+6}=0;
             end
-           % set(handles.uitable5,'data',handles.mStudent)
+%             set(handles.uitable5,'data',handles.mStudent)
         end
         if ~isempty(v1540)
-           mStudent(nRow:end,n600+7)={2};
+           mStudent(nRow:end,n600+7)={1};
             for iAbsent =2:numel(v1540)
                 if strcmpi(v1540{iAbsent},'NIL')
                     break;
                 end
                 nIdx = findStudentID(vId,v1540{iAbsent});
-               mStudent{nIdx,n600+7}=1;
+               mStudent{nIdx,n600+7}=0;
             end
-            %set(handles.uitable5,'data',handles.mStudent)
+%             set(handles.uitable5,'data',handles.mStudent)
         end
         
         %     elseif
